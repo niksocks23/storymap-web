@@ -208,6 +208,9 @@ html, body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    z-index: 100 !important; 
+    background: #fff !important; 
+    backdrop-filter: none !important; 
   }
 
   .close-btn {
