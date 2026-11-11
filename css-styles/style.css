@@ -180,19 +180,25 @@ html, body {
    =============================== */
 @media (max-width: 600px) {
   
-  /* --- ФИКС ДЛЯ ПОДПИСИ ПРОЕКТА --- */
+  /* Выравниваем кнопки зума и надпись по одной линии снизу */
+  #zoom-controls {
+    position: absolute;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px)); /* Одинаковый отступ для обоих */
+    right: 12px;
+  }
+
   #credits {
-    position: fixed; /* Жестко фиксируем на экране */
-    bottom: 20px; /* Отступ от низа */
+    position: absolute; /* Возвращаем absolute, чтобы он вел себя так же, как зум */
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px)); /* Одинаковый отступ */
     left: 12px;
     padding: 8px 12px;
-    z-index: 100; /* Ставим выше карты и других элементов */
-    background: rgba(255, 255, 255, 0.95); /* Убираем blur, который глючит на мобилках */
-    backdrop-filter: none; 
+    z-index: 5;
+    background: rgba(255, 255, 255, 0.95); 
+    backdrop-filter: none; /* Убираем размытие, чтобы не глючило на мобилках */
   }
+  
   .credits-title { font-size: 12px; }
   .credits-author { font-size: 10px; }
-
 
   /* --- ИНФО-ПАНЕЛЬ (МОБИЛКИ) --- */
   #info-panel {
