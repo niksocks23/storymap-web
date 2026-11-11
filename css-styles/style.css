@@ -1,0 +1,226 @@
+:root {
+  /* цвета фона и сетки */
+  --bg-color: #f4f7f9;
+  --grid-color: rgba(0, 0, 0, 0.05);
+}
+
+/* сброс отступов, скрываем скролл, запрещаем выделение текста */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { 
+  height: 100%; 
+  overflow: hidden; 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  user-select: none; /* запрет выделения текста */
+  -webkit-user-select: none;
+}
+
+/* главный контейнер */
+#app { 
+  position: relative; 
+  width: 100vw; 
+  height: 100vh; 
+  overflow: hidden; 
+  background-color: var(--bg-color);
+  user-select: none; /* дублируем для надежности */
+}
+
+/* зона карты с фоновой сеткой */
+#map-container {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  background-color: var(--bg-color);
+  background-image: 
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+}
+/* курсор при перетаскивании */
+#map-container.dragging { cursor: grabbing; }
+
+/* обертка для движения карты */
+#map-wrapper {
+  position: absolute;
+  transform-origin: 0 0;
+  will-change: transform;
+  width: 1536px;
+  height: 1752px;
+}
+
+/* холст для webgl (волны) */
+#map-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  pointer-events: none; /* клики проходят сквозь к точкам */
+  position: relative; z-index: 1;
+}
+
+/* слой с деревьями на фоне */
+#trees-layer {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;     /* деревья под картой */
+  pointer-events: none; /* чтобы не мешали кликам */
+}
+
+.bg-tree {
+  position: absolute;
+  transform-origin: bottom center;
+  /* плавное покачивание на ветру */
+  animation: windSway 6s ease-in-out infinite alternate;
+  -webkit-user-drag: none; /* запрет перетаскивания картинки */
+}
+
+/* анимация колыхания деревьев */
+@keyframes windSway {
+  0% { transform: rotate(-5deg) scale(1); }
+  100% { transform: rotate(5deg) scale(1.02); }
+}
+
+/* контейнер для точек */
+#markers { 
+  position: absolute; 
+  inset: 0; 
+  --ms: 1; 
+  z-index: 2; 
+}
+
+/* кнопка-точка */
+.marker {
+  position: absolute;
+  width: 0; height: 0;
+  border: none; background: none; padding: 0;
+}
+.marker-inner {
+  position: absolute;
+  left: 0; top: 0;
+  width: 22px; height: 22px;
+  margin: -11px 0 0 -11px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+  transform: scale(var(--ms));
+}
+
+/* подсветка при наведении */
+.marker:hover .marker-inner {
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.5), 0 4px 14px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+
+/* активная точка */
+.marker.active .marker-inner {
+  box-shadow: 0 0 0 6px rgba(59,130,246,0.35), 0 4px 14px rgba(0,0,0,0.5);
+  z-index: 11;
+}
+
+/* цвета категорий */
+.marker[data-cat="Памятник"]    .marker-inner { background: #3b82f6; }
+.marker[data-cat="Архитектура"] .marker-inner { background: #10b981; }
+.marker[data-cat="Искусство"]   .marker-inner { background: #a855f7; }
+.marker[data-cat="Здание"]      .marker-inner { background: #f59e0b; }
+
+/* общий стиль панелей */
+.panel {
+  background: rgba(255,255,255,0.97);
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  backdrop-filter: blur(8px);
+}
+
+/* легенда */
+#legend {
+  position: absolute; top: 16px; left: 16px;
+  padding: 12px 16px; font-size: 13px; z-index: 5;
+}
+.legend-title { font-weight: 600; margin-bottom: 8px; color: #333; }
+.legend-items { display: flex; flex-direction: column; gap: 6px; }
+.legend-item { display: flex; align-items: center; gap: 8px; color: #555; }
+.legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+/* кнопки зума */
+#zoom-controls {
+  position: absolute; bottom: 16px; right: 16px;
+  display: flex; flex-direction: column;
+  overflow: hidden; z-index: 5;
+}
+#zoom-controls button {
+  width: 44px; height: 44px; border: none;
+  background: transparent; font-size: 20px; cursor: pointer;
+  color: #333; transition: background 0.15s;
+}
+#zoom-controls button:hover { background: rgba(0,0,0,0.06); }
+#zoom-controls button + button { border-top: 1px solid #eee; }
+
+/* боковая панель с инфо */
+#info-panel {
+  position: absolute;
+  top: 16px; right: 16px; bottom: 16px;
+  width: 380px; max-width: calc(100vw - 32px);
+  overflow-y: auto; z-index: 20;
+  transition: transform 0.3s, opacity 0.3s;
+  transform: translateX(20px);
+  opacity: 0; pointer-events: none;
+}
+#info-panel:not(.hidden) {
+  transform: translateX(0); opacity: 1; pointer-events: auto;
+}
+#info-panel.hidden { display: none; }
+
+/* кнопка закрытия */
+.close-btn {
+  position: sticky; top: 8px; float: right; margin: 8px;
+  width: 32px; height: 32px; border-radius: 50%; border: none;
+  background: rgba(0,0,0,0.08); font-size: 20px; cursor: pointer;
+  color: #333; z-index: 1;
+}
+.close-btn:hover { background: rgba(0,0,0,0.15); }
+
+/* контент панели */
+.info-body { padding: 0 24px 24px; }
+.info-img {
+  width: calc(100% + 48px); margin: 0 -24px 16px;
+  height: 200px; object-fit: cover; display: block; background: #eee;
+}
+.info-category {
+  display: inline-block; font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: #666; margin-bottom: 6px;
+}
+#info-name { font-size: 22px; font-weight: 700; color: #111; margin-bottom: 12px; line-height: 1.3; }
+.info-description {
+  font-size: 14px; line-height: 1.6; color: #444;
+  white-space: pre-line; margin-bottom: 20px;
+}
+
+/* блок с qr-кодом */
+.info-qr-block {
+  background: #f5f7f9; border-radius: 8px;
+  padding: 12px; text-align: center; margin-bottom: 16px;
+}
+.qr-label { font-size: 12px; color: #888; margin-bottom: 8px; text-transform: uppercase; }
+.info-qr {
+  width: 140px; height: 140px; object-fit: contain;
+  background: #fff; padding: 6px; border-radius: 4px;
+}
+
+/* кнопка подробнее */
+.info-link {
+  display: block; color: #3b82f6; text-decoration: none;
+  font-weight: 600; font-size: 14px; padding: 10px 16px;
+  background: #eff6ff; border-radius: 8px;
+  transition: background 0.15s; text-align: center;
+}
+.info-link:hover { background: #dbeafe; }
+
+/* адаптив под телефоны */
+@media (max-width: 600px) {
+  #info-panel { top: 0; right: 0; bottom: 0; left: 0; width: 100%; max-width: 100%; border-radius: 0; }
+  #legend { font-size: 12px; padding: 8px 12px; }
+}

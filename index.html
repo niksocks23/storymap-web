@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoryMap Project</title>
+    <link rel="icon" href="images/icon.png" type="image/png">
+    <link rel="stylesheet" href="resetBrowserStyles.css">
+    <link rel="stylesheet" href="css-styles/style.css">
+</head>
+<body>
+    <div id="app">
+        <div id="map-container">
+        <div id="map-wrapper">
+            <!-- ИСПРАВЛЕНО НА map.jpeg -->
+            <canvas id="map-canvas" width="1536" height="1752"></canvas>
+            <div id="markers"></div>
+        </div>
+        </div>
+
+        <div id="legend" class="panel">
+        <div class="legend-title">Категории</div>
+        <div class="legend-items" id="legend-items"></div>
+        </div>
+
+        <div id="info-panel" class="panel hidden" role="dialog" aria-label="Информация о месте">
+        <button class="close-btn" id="close-btn" aria-label="Закрыть">×</button>
+        <div class="info-body">
+            <img id="info-img" class="info-img" alt="">
+            <div class="info-category" id="info-category"></div>
+            <h2 id="info-name"></h2>
+            <div id="info-description" class="info-description"></div>
+            <div class="info-qr-block">
+            <div class="qr-label">QR-код</div>
+            <img id="info-qr" class="info-qr" alt="QR">
+            </div>
+            <a id="info-link" class="info-link" target="_blank" rel="noopener">Подробнее →</a>
+        </div>
+        </div>
+
+        <div id="zoom-controls" class="panel">
+        <button id="zoom-in" aria-label="Приблизить">+</button>
+        <button id="zoom-out" aria-label="Отдалить">−</button>
+        <button id="zoom-fit" aria-label="Вписать">⤢</button>
+        </div>
+    </div>
+    <script type="module" src="scripts/main.js"></script>
+</body>
+</html>
