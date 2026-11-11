@@ -6,7 +6,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { 
   height: 100%; 
-  height: 100dvh; /* ВОТ ЭТО РЕШАЕТ ПРОБЛЕМУ С ОБРЕЗАНИЕМ СНИЗУ */
   overflow: hidden; 
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   user-select: none;
@@ -16,7 +15,7 @@ html, body {
 #app { 
   position: relative; 
   width: 100vw; 
-  height: 100%;
+  height: 100vh; 
   overflow: hidden; 
   background-color: var(--bg-color);
 }
@@ -111,14 +110,15 @@ html, body {
 #zoom-controls button:hover { background: rgba(0,0,0,0.06); }
 #zoom-controls button + button { border-top: 1px solid #eee; }
 
-/* --- ИНФО-ПАНЕЛЬ --- */
+/* =========================================
+   ВЕРСИЯ ДЛЯ ПК (КАК БЫЛО ИЗНАЧАЛЬНО)
+   ========================================= */
 #info-panel {
   position: absolute;
   top: 16px; right: 16px; bottom: 16px;
   width: 380px; max-width: calc(100vw - 32px);
   z-index: 20;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto; /* Скроллится вся панель */
   transition: transform 0.3s, opacity 0.3s;
   transform: translateX(20px);
   opacity: 0; pointer-events: none;
@@ -126,82 +126,119 @@ html, body {
 #info-panel:not(.hidden) { transform: translateX(0); opacity: 1; pointer-events: auto; }
 #info-panel.hidden { display: none; }
 
-.info-header {
-  flex-shrink: 0;
-  height: 0; 
-  position: relative;
-  z-index: 2;
-}
-
+/* Крестик на ПК (прилипает к верху при скролле) */
 .close-btn {
-  position: absolute;
-  top: 12px; right: 12px;
+  position: sticky; top: 8px; float: right; margin: 8px;
   width: 32px; height: 32px; border-radius: 50%; border: none;
-  background: rgba(255, 255, 255, 0.9); box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  font-size: 20px; cursor: pointer; color: #333;
-  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.08); font-size: 20px; cursor: pointer;
+  color: #333; z-index: 10;
 }
-.close-btn:hover { background: #fff; }
-
-.info-scroll {
-  flex: 1; 
-  overflow-y: auto; 
-  padding: 0 24px 16px;
-  -webkit-overflow-scrolling: touch; 
-}
+.close-btn:hover { background: rgba(0,0,0,0.15); }
 
 .info-img {
   width: calc(100% + 48px); margin: 0 -24px 16px;
   height: 200px; object-fit: cover; display: block; background: #eee;
 }
-.info-category { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #666; margin-bottom: 6px; }
-#info-name { font-size: 22px; font-weight: 700; color: #111; margin-bottom: 12px; line-height: 1.3; }
-.info-description { font-size: 14px; line-height: 1.6; color: #444; white-space: pre-line; }
+.info-category { margin: 0 24px 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #666; }
+#info-name { margin: 0 24px 12px; font-size: 22px; font-weight: 700; color: #111; line-height: 1.3; }
+.info-description { margin: 0 24px 20px; font-size: 14px; line-height: 1.6; color: #444; white-space: pre-line; }
 
-/* Подвал (QR и кнопка) */
+/* Подвал на ПК (БОЛЬШОЙ QR) */
 .info-footer {
-  flex-shrink: 0; 
-  padding: 12px 24px 16px;
-  border-top: 1px solid #eee;
-  background: #fff;
-  border-radius: 0 0 12px 12px;
-  display: flex; align-items: center; gap: 16px;
+  padding: 0 24px 24px;
 }
-
 .info-qr-block {
-  width: 70px; height: 70px; flex-shrink: 0;
-  background: #f5f7f9; border-radius: 8px; padding: 4px;
+  background: #f5f7f9; border-radius: 8px;
+  padding: 12px; text-align: center; margin-bottom: 16px;
 }
-.info-qr { width: 100%; height: 100%; object-fit: contain; }
-
+.qr-label { font-size: 12px; color: #888; margin-bottom: 8px; text-transform: uppercase; }
+.info-qr {
+  width: 140px; height: 140px; object-fit: contain;
+  background: #fff; padding: 6px; border-radius: 4px;
+}
 .info-link {
-  flex: 1;
-  display: flex; align-items: center; justify-content: center;
-  color: #3b82f6; text-decoration: none; font-weight: 600; font-size: 14px;
-  padding: 12px; background: #eff6ff; border-radius: 8px;
+  display: block; color: #3b82f6; text-decoration: none;
+  font-weight: 600; font-size: 14px; padding: 10px 16px;
+  background: #eff6ff; border-radius: 8px;
+  transition: background 0.15s; text-align: center;
 }
 
-/* --- МОБИЛЬНАЯ ВЕРСИЯ --- */
+/* =========================================
+   ВЕРСИЯ ДЛЯ ТЕЛЕФОНОВ (ЖЕСТКАЯ ФИКСАЦИЯ)
+   ========================================= */
 @media (max-width: 600px) {
   #info-panel {
+    position: fixed; /* Фиксируем на весь экран */
     top: 0; right: 0; bottom: 0; left: 0;
     width: 100%; max-width: 100%; border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Отключаем скролл самой панели */
   }
-  .info-scroll {
-    padding: 0 16px 16px;
+
+  /* Крестик на телефоне (всегда в углу, поверх фото) */
+  .close-btn {
+    position: fixed;
+    top: 16px; right: 16px;
+    float: none; margin: 0;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 999; /* Поверх всего */
   }
+
+  /* Контентная часть (скроллится) */
+  #info-panel > img,
+  .info-category,
+  #info-name,
+  .info-description {
+    /* Принудительно заставляем тексты и фото скроллиться */
+    flex-shrink: 0; 
+  }
+  
+  /* Обертка для скролла (нам придется обернуть контент в JS или сделать это через CSS) */
+  /* Так как мы убрали обертку, используем трюк с padding-bottom для подвала */
+  
+  #info-panel {
+    overflow-y: auto; /* Возвращаем скролл, но подвал будет position: sticky */
+  }
+
   .info-img {
-    width: calc(100% + 32px); margin: 0 -16px 16px;
+    width: 100%; margin: 0 0 16px;
     height: 250px;
   }
-  
-  /* ВОТ ЗДЕСЬ ДОБАВЛЕН ОТСТУП ДЛЯ БЕЗОПАСНОЙ ЗОНЫ (САФАРИ/ХРОМ) */
+  .info-category { margin: 0 16px 6px; }
+  #info-name { margin: 0 16px 12px; }
+  .info-description { margin: 0 16px 20px; }
+
+  /* ПОДВАЛ НА ТЕЛЕФОНЕ: МАЛЕНЬКИЙ QR + КНОПКА */
   .info-footer {
+    position: sticky; /* Прилипает к низу экрана */
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding: 12px 16px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); /* Отступаем от нижней панели браузера */
-    border-radius: 0;
+    /* ВОТ ЭТА СТРОКА СПАСАЕТ ОТ ОБРЕЗАНИЯ НА IPHONE/ANDROID */
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 16px));
+    background: #fff;
+    border-top: 1px solid #eee;
+    margin-top: auto; /* Прижимает к низу */
+    z-index: 10;
   }
-  
-  #legend { font-size: 12px; padding: 8px 12px; top: 12px; left: 12px; }
-  #zoom-controls { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); right: 12px; }
+
+  .info-qr-block {
+    width: 60px; height: 60px;
+    padding: 4px; margin-bottom: 0;
+    flex-shrink: 0;
+    background: #f5f7f9; border-radius: 8px;
+  }
+  .qr-label { display: none; } /* Скрываем текст "QR-код" */
+  .info-qr {
+    width: 100%; height: 100%; padding: 0;
+  }
+  .info-link {
+    flex: 1;
+    padding: 12px;
+    font-size: 15px;
+  }
 }
