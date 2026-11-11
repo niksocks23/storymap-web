@@ -14,7 +14,6 @@ export function applyTransform(container, wrapper, markersEl, CONFIG) {
   const scaledWidth = CONFIG.mapWidth * state.scale;
   const scaledHeight = CONFIG.mapHeight * state.scale;
   
-  // магнит: не даем утащить карту далеко за экран (оставляем 200px)
   const margin = 200; 
   const minTx = margin - scaledWidth; 
   const maxTx = cw - margin;          
@@ -24,19 +23,14 @@ export function applyTransform(container, wrapper, markersEl, CONFIG) {
   const maxTy = ch - margin;
   state.ty = Math.max(minTy, Math.min(maxTy, state.ty));
 
-  // двигаем саму карту
   wrapper.style.transform = `translate(${state.tx}px, ${state.ty}px) scale(${state.scale})`;
-  
-  // фиксируем размер маркеров
   markersEl.style.setProperty('--ms', String(1 / state.scale));
   
-  // двигаем сетку
   const gridSize = 40 * state.scale;
   container.style.backgroundPosition = `${state.tx}px ${state.ty}px`;
   container.style.backgroundSize = `${gridSize}px ${gridSize}px`;
 }
 
-// центрируем карту на экране
 export function fitToScreen(container, wrapper, markersEl, CONFIG) {
   const cw = container.clientWidth;
   const ch = container.clientHeight;
@@ -46,34 +40,23 @@ export function fitToScreen(container, wrapper, markersEl, CONFIG) {
   applyTransform(container, wrapper, markersEl, CONFIG);
 }
 
-// зум карты
 export function zoomAt(factor, cx, cy, container, wrapper, markersEl, CONFIG) {
   const newScale = Math.max(CONFIG.minZoom, Math.min(CONFIG.maxZoom, state.scale * factor));
-  
-  // математика зума к курсору
   const k = newScale / state.scale;
   state.tx = cx - (cx - state.tx) * k;
   state.ty = cy - (cy - state.ty) * k;
   state.scale = newScale;
-  
   applyTransform(container, wrapper, markersEl, CONFIG);
 }
 
-// обработка кликов и свайпов
 export function initMapEvents(container, wrapper, markersEl, CONFIG) {
-  
-  // нажатие мыши или пальца
   container.addEventListener('pointerdown', (e) => {
-    // ВАЖНО: сбрасываем флаг движения при ЛЮБОМ новом клике, 
-    // чтобы маркеры не блокировались после перетаскивания
     state.moved = false; 
-
-    if (e.target.closest('.marker')) return; // если кликнули по маркеру — пропускаем логику карты
+    if (e.target.closest('.marker')) return; 
     
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (pointers.size === 1) {
-      // начинаем тащить
       state.isDragging = true;
       state.dragStartX = e.clientX;
       state.dragStartY = e.clientY;
@@ -82,10 +65,10 @@ export function initMapEvents(container, wrapper, markersEl, CONFIG) {
       container.classList.add('dragging');
       container.setPointerCapture(e.pointerId);
     } else if (pointers.size === 2) {
-      // два пальца для зума
       state.isDragging = false;
       const [p1, p2] = [...pointers.values()];
       const rect = container.getBoundingClientRect();
+      // Считаем начальное состояние для пинч-зума
       pinchState = {
         dist: Math.hypot(p2.x - p1.x, p2.y - p1.y),
         scale: state.scale,
@@ -97,29 +80,34 @@ export function initMapEvents(container, wrapper, markersEl, CONFIG) {
     }
   });
 
-  // движение мыши или пальцев
   container.addEventListener('pointermove', (e) => {
     if (!pointers.has(e.pointerId)) return;
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (pointers.size === 2 && pinchState) {
-      // зум двумя пальцами
       const [p1, p2] = [...pointers.values()];
       const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+      
+      // Вычисляем новый масштаб
       const newScale = Math.max(CONFIG.minZoom, Math.min(CONFIG.maxZoom, pinchState.scale * (dist / pinchState.dist)));
       const k = newScale / pinchState.scale;
       
+      // Вычисляем текущий центр между пальцами (он может двигаться)
+      const rect = container.getBoundingClientRect();
+      const currentMidX = (p1.x + p2.x) / 2 - rect.left;
+      const currentMidY = (p1.y + p2.y) / 2 - rect.top;
+
+      // Применяем зум и смещение
       state.scale = newScale;
-      state.tx = pinchState.midX - (pinchState.midX - pinchState.tx) * k;
-      state.ty = pinchState.midY - (pinchState.midY - pinchState.ty) * k;
+      state.tx = currentMidX - (pinchState.midX - pinchState.tx) * k;
+      state.ty = currentMidY - (pinchState.midY - pinchState.ty) * k;
+      
       state.moved = true;
       applyTransform(container, wrapper, markersEl, CONFIG);
     } else if (state.isDragging && pointers.size === 1) {
-      // таскаем карту
       const dx = e.clientX - state.dragStartX;
       const dy = e.clientY - state.dragStartY;
       
-      // защита от случайных кликов при перетаскивании
       if (Math.abs(dx) > 3 || Math.abs(dy) > 3) state.moved = true;
       
       state.tx = state.dragTx + dx;
@@ -128,7 +116,6 @@ export function initMapEvents(container, wrapper, markersEl, CONFIG) {
     }
   });
 
-  // отпускание
   function endPointer(e) {
     pointers.delete(e.pointerId);
     if (pointers.size < 2) pinchState = null;
@@ -137,7 +124,6 @@ export function initMapEvents(container, wrapper, markersEl, CONFIG) {
       state.isDragging = false;
       container.classList.remove('dragging');
     } else if (pointers.size === 1) {
-      // если остался один палец — продолжаем таскать
       const [p] = [...pointers.values()];
       state.isDragging = true;
       state.dragStartX = p.x;
@@ -149,7 +135,6 @@ export function initMapEvents(container, wrapper, markersEl, CONFIG) {
   container.addEventListener('pointerup', endPointer);
   container.addEventListener('pointercancel', endPointer);
 
-  // колесико мыши (зум)
   container.addEventListener('wheel', (e) => {
     e.preventDefault();
     const rect = container.getBoundingClientRect();
