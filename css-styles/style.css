@@ -111,14 +111,14 @@ html, body {
 #zoom-controls button + button { border-top: 1px solid #eee; }
 
 /* =========================================
-   ВЕРСИЯ ДЛЯ ПК (КАК БЫЛО ИЗНАЧАЛЬНО)
+   ВЕРСИЯ ДЛЯ ПК
    ========================================= */
 #info-panel {
   position: absolute;
   top: 16px; right: 16px; bottom: 16px;
   width: 380px; max-width: calc(100vw - 32px);
   z-index: 20;
-  overflow-y: auto; /* Скроллится вся панель */
+  overflow-y: auto;
   transition: transform 0.3s, opacity 0.3s;
   transform: translateX(20px);
   opacity: 0; pointer-events: none;
@@ -126,7 +126,6 @@ html, body {
 #info-panel:not(.hidden) { transform: translateX(0); opacity: 1; pointer-events: auto; }
 #info-panel.hidden { display: none; }
 
-/* Крестик на ПК (прилипает к верху при скролле) */
 .close-btn {
   position: sticky; top: 8px; float: right; margin: 8px;
   width: 32px; height: 32px; border-radius: 50%; border: none;
@@ -143,7 +142,6 @@ html, body {
 #info-name { margin: 0 24px 12px; font-size: 22px; font-weight: 700; color: #111; line-height: 1.3; }
 .info-description { margin: 0 24px 20px; font-size: 14px; line-height: 1.6; color: #444; white-space: pre-line; }
 
-/* Подвал на ПК (БОЛЬШОЙ QR) */
 .info-footer {
   padding: 0 24px 24px;
 }
@@ -163,65 +161,67 @@ html, body {
   transition: background 0.15s; text-align: center;
 }
 
-/* --- ПОДПИСЬ ПРОЕКТА --- */
+/* ПОДПИСЬ ПРОЕКТА (ПК) */
 #credits {
   position: absolute;
   bottom: 16px;
   left: 16px;
   padding: 10px 16px;
   z-index: 5;
-  pointer-events: none; /* чтобы не мешала кликать по карте */
+  pointer-events: none;
   color: #333;
 }
+.credits-title { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+.credits-author { font-size: 12px; color: #666; }
 
-.credits-title {
-  font-weight: 700;
-  font-size: 14px;
-  margin-bottom: 2px;
-}
-
-.credits-author {
-  font-size: 12px;
-  color: #666;
-}
 
 /* ===============================
    ВЕРСИЯ ДЛЯ ТЕЛЕФОНОВ
    =============================== */
 @media (max-width: 600px) {
+  
+  /* --- ФИКС ДЛЯ ПОДПИСИ ПРОЕКТА --- */
+  #credits {
+    position: fixed; /* Жестко фиксируем на экране */
+    bottom: 20px; /* Отступ от низа */
+    left: 12px;
+    padding: 8px 12px;
+    z-index: 100; /* Ставим выше карты и других элементов */
+    background: rgba(255, 255, 255, 0.95); /* Убираем blur, который глючит на мобилках */
+    backdrop-filter: none; 
+  }
+  .credits-title { font-size: 12px; }
+  .credits-author { font-size: 10px; }
+
+
+  /* --- ИНФО-ПАНЕЛЬ (МОБИЛКИ) --- */
   #info-panel {
-    position: fixed; /* Фиксируем на весь экран */
+    position: fixed;
     top: 0; right: 0; bottom: 0; left: 0;
     width: 100%; max-width: 100%; border-radius: 0;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Отключаем скролл самой панели */
+    overflow: hidden;
   }
 
-  /* Крестик на телефоне (всегда в углу, поверх фото) */
   .close-btn {
     position: fixed;
     top: 16px; right: 16px;
     float: none; margin: 0;
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    z-index: 999; /* Поверх всего */
+    z-index: 999;
   }
 
-  /* Контентная часть (скроллится) */
   #info-panel > img,
   .info-category,
   #info-name,
   .info-description {
-    /* Принудительно заставляем тексты и фото скроллиться */
     flex-shrink: 0; 
   }
   
-  /* Обертка для скролла (нам придется обернуть контент в JS или сделать это через CSS) */
-  /* Так как мы убрали обертку, используем трюк с padding-bottom для подвала */
-  
   #info-panel {
-    overflow-y: auto; /* Возвращаем скролл, но подвал будет position: sticky */
+    overflow-y: auto;
   }
 
   .info-img {
@@ -232,19 +232,17 @@ html, body {
   #info-name { margin: 0 16px 12px; }
   .info-description { margin: 0 16px 20px; }
 
-  /* ПОДВАЛ НА ТЕЛЕФОНЕ: МАЛЕНЬКИЙ QR + КНОПКА */
   .info-footer {
-    position: sticky; /* Прилипает к низу экрана */
+    position: sticky;
     bottom: 0;
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    /* ВОТ ЭТА СТРОКА СПАСАЕТ ОТ ОБРЕЗАНИЯ НА IPHONE/ANDROID */
     padding-bottom: calc(12px + env(safe-area-inset-bottom, 16px));
     background: #fff;
     border-top: 1px solid #eee;
-    margin-top: auto; /* Прижимает к низу */
+    margin-top: auto;
     z-index: 10;
   }
 
@@ -254,7 +252,7 @@ html, body {
     flex-shrink: 0;
     background: #f5f7f9; border-radius: 8px;
   }
-  .qr-label { display: none; } /* скрытие текста QR*/
+  .qr-label { display: none; }
   .info-qr {
     width: 100%; height: 100%; padding: 0;
   }
@@ -263,13 +261,4 @@ html, body {
     padding: 12px;
     font-size: 15px;
   }
-
-  /* надпись */
-    #credits {
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px)); /* фикс: подъём над панелью телефона */
-    left: 12px;
-    padding: 8px 12px;
-  }
-  .credits-title { font-size: 12px; }
-  .credits-author { font-size: 10px; }
 }
