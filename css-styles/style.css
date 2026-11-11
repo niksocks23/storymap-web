@@ -163,6 +163,28 @@ html, body {
   transition: background 0.15s; text-align: center;
 }
 
+/* --- ПОДПИСЬ ПРОЕКТА --- */
+#credits {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  padding: 10px 16px;
+  z-index: 5;
+  pointer-events: none; /* чтобы не мешала кликать по карте */
+  color: #333;
+}
+
+.credits-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.credits-author {
+  font-size: 12px;
+  color: #666;
+}
+
 /* ===============================
    ВЕРСИЯ ДЛЯ ТЕЛЕФОНОВ
    =============================== */
@@ -241,4 +263,13 @@ html, body {
     padding: 12px;
     font-size: 15px;
   }
+
+  /* надпись */
+  #credits {
+    bottom: 16px;
+    left: 12px;
+    padding: 8px 12px;
+  }
+  .credits-title { font-size: 12px; }
+  .credits-author { font-size: 10px; }
 }
