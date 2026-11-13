@@ -1,6 +1,29 @@
+/* --- ПЕРЕМЕННЫЕ ЦВЕТОВ (СВЕТЛАЯ ТЕМА) --- */
 :root {
   --bg-color: #f4f7f9;
   --grid-color: rgba(0, 0, 0, 0.05);
+  --panel-bg: rgba(255, 255, 255, 0.97);
+  --text-main: #111;
+  --text-muted: #666;
+  --border-color: #eee;
+  --input-bg: #fff;
+  --shadow: rgba(0, 0, 0, 0.15);
+  --btn-hover: rgba(0, 0, 0, 0.06);
+  --qr-bg: #f5f7f9;
+}
+
+/* --- ПЕРЕМЕННЫЕ ЦВЕТОВ (ТЕМНАЯ ТЕМА) --- */
+body.dark-theme {
+  --bg-color: #121212;
+  --grid-color: rgba(255, 255, 255, 0.03);
+  --panel-bg: rgba(30, 30, 30, 0.97);
+  --text-main: #f0f0f0;
+  --text-muted: #aaa;
+  --border-color: #333;
+  --input-bg: #1e1e1e;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --btn-hover: rgba(255, 255, 255, 0.1);
+  --qr-bg: rgba(255, 255, 255, 0.05);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -10,6 +33,7 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   user-select: none;
   -webkit-user-select: none;
+  transition: background-color 0.3s;
 }
 
 #app { 
@@ -87,28 +111,31 @@ html, body {
 .marker[data-cat="Здание"]      .marker-inner { background: #f59e0b; }
 
 .panel {
-  background: rgba(255,255,255,0.97);
+  background: var(--panel-bg);
   border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 24px var(--shadow);
   backdrop-filter: blur(8px);
+  color: var(--text-main);
 }
 
 #legend {
   position: absolute; top: 16px; left: 16px; padding: 12px 16px; font-size: 13px; z-index: 5;
+  min-width: 200px;
 }
-.legend-title { font-weight: 600; margin-bottom: 8px; color: #333; }
+.legend-title { font-weight: 600; margin-bottom: 8px; color: var(--text-main); }
 .legend-items { display: flex; flex-direction: column; gap: 6px; }
-.legend-item { display: flex; align-items: center; gap: 8px; color: #555; }
+.legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
 .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
 
 #zoom-controls {
   position: absolute; bottom: 16px; right: 16px; display: flex; flex-direction: column; overflow: hidden; z-index: 5;
 }
 #zoom-controls button {
-  width: 44px; height: 44px; border: none; background: transparent; font-size: 20px; cursor: pointer; color: #333;
+  width: 44px; height: 44px; border: none; background: transparent; font-size: 20px; cursor: pointer; color: var(--text-main);
+  display: flex; align-items: center; justify-content: center;
 }
-#zoom-controls button:hover { background: rgba(0,0,0,0.06); }
-#zoom-controls button + button { border-top: 1px solid #eee; }
+#zoom-controls button:hover { background: var(--btn-hover); }
+#zoom-controls button + button { border-top: 1px solid var(--border-color); }
 
 /* =========================================
    ВЕРСИЯ ДЛЯ ПК
@@ -126,30 +153,51 @@ html, body {
 #info-panel:not(.hidden) { transform: translateX(0); opacity: 1; pointer-events: auto; }
 #info-panel.hidden { display: none; }
 
+/* --- АНИМАЦИЯ ПОЯВЛЕНИЯ КОНТЕНТА --- */
+@keyframes slideUpFade {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+#info-panel:not(.hidden) .info-img,
+#info-panel:not(.hidden) .info-category,
+#info-panel:not(.hidden) #info-name,
+#info-panel:not(.hidden) .info-description,
+#info-panel:not(.hidden) .info-footer {
+  animation: slideUpFade 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  opacity: 0; /* Скрыто до начала анимации */
+}
+
+/* Задержки для эффекта волны */
+#info-panel:not(.hidden) .info-img { animation-delay: 0.05s; }
+#info-panel:not(.hidden) .info-category { animation-delay: 0.1s; }
+#info-panel:not(.hidden) #info-name { animation-delay: 0.15s; }
+#info-panel:not(.hidden) .info-description { animation-delay: 0.2s; }
+#info-panel:not(.hidden) .info-footer { animation-delay: 0.25s; }
+/* ----------------------------------- */
+
 .close-btn {
   position: sticky; top: 8px; float: right; margin: 8px;
   width: 32px; height: 32px; border-radius: 50%; border: none;
-  background: rgba(0,0,0,0.08); font-size: 20px; cursor: pointer;
-  color: #333; z-index: 10;
+  background: var(--btn-hover); font-size: 20px; cursor: pointer;
+  color: var(--text-main); z-index: 10;
 }
 .close-btn:hover { background: rgba(0,0,0,0.15); }
 
 .info-img {
   width: calc(100% + 48px); margin: 0 -24px 16px;
-  height: 200px; object-fit: cover; display: block; background: #eee;
+  height: 200px; object-fit: cover; display: block; background: var(--btn-hover);
 }
-.info-category { margin: 0 24px 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #666; }
-#info-name { margin: 0 24px 12px; font-size: 22px; font-weight: 700; color: #111; line-height: 1.3; }
-.info-description { margin: 0 24px 20px; font-size: 14px; line-height: 1.6; color: #444; white-space: pre-line; }
+.info-category { margin: 0 24px 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); }
+#info-name { margin: 0 24px 12px; font-size: 22px; font-weight: 700; color: var(--text-main); line-height: 1.3; }
+.info-description { margin: 0 24px 20px; font-size: 14px; line-height: 1.6; color: var(--text-main); white-space: pre-line; }
 
-.info-footer {
-  padding: 0 24px 24px;
-}
+.info-footer { padding: 0 24px 24px; }
 .info-qr-block {
-  background: #f5f7f9; border-radius: 8px;
+  background: var(--qr-bg); border-radius: 8px;
   padding: 12px; text-align: center; margin-bottom: 16px;
 }
-.qr-label { font-size: 12px; color: #888; margin-bottom: 8px; text-transform: uppercase; }
+.qr-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
 .info-qr {
   width: 140px; height: 140px; object-fit: contain;
   background: #fff; padding: 6px; border-radius: 4px;
@@ -157,11 +205,11 @@ html, body {
 .info-link {
   display: block; color: #3b82f6; text-decoration: none;
   font-weight: 600; font-size: 14px; padding: 10px 16px;
-  background: #eff6ff; border-radius: 8px;
+  background: rgba(59,130,246,0.1); border-radius: 8px;
   transition: background 0.15s; text-align: center;
 }
 
-/* ПОДПИСЬ ПРОЕКТА (ПК) */
+/* ПОДПИСЬ ПРОЕКТА И ПЕРЕКЛЮЧАТЕЛЬ ТЕМ (ПК) */
 #credits {
   position: absolute;
   bottom: 16px;
@@ -169,32 +217,139 @@ html, body {
   padding: 10px 16px;
   z-index: 5;
   pointer-events: none;
-  color: #333;
+  color: var(--text-main);
 }
 .credits-title { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
-.credits-author { font-size: 12px; color: #666; }
+.credits-author { font-size: 12px; color: var(--text-muted); }
 
+/* НОВЫЙ ПЕРЕКЛЮЧАТЕЛЬ ТЕМ */
+#theme-switcher {
+  position: absolute;
+  bottom: 75px; /* Встает ровно над плашкой #credits */
+  left: 16px;
+  display: flex;
+  z-index: 5;
+  overflow: hidden;
+  padding: 4px;
+  gap: 4px;
+}
+
+.theme-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.1s;
+  opacity: 0.6;
+}
+
+/* Стили для картинок внутри кнопок */
+.theme-btn img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  pointer-events: none; /* Чтобы клик всегда срабатывал по кнопке, а не по картинке */
+  transition: filter 0.3s; /* Плавная смена цвета */
+}
+
+/* ИНВЕРСИЯ ИКОНОК В ТЕМНОЙ ТЕМЕ */
+body.dark-theme .theme-btn img {
+  filter: invert(1);
+}
+
+.theme-btn:hover {
+  background: var(--btn-hover);
+  opacity: 1;
+}
+
+.theme-btn.active {
+  background: rgba(59, 130, 246, 0.15); /* Синий фон для активной */
+  opacity: 1;
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.3);
+}
+
+/* --- СТИЛИ ДЛЯ ПОИСКА --- */
+.search-container { position: relative; margin-bottom: 12px; }
+#search-input {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px;
+  font-size: 13px; outline: none; font-family: inherit; background: var(--input-bg);
+  color: var(--text-main); transition: border-color 0.2s;
+}
+#search-input:focus { border-color: #3b82f6; }
+#search-results {
+  position: absolute; top: 100%; left: 0; right: 0; background: var(--panel-bg);
+  border-radius: 6px; box-shadow: 0 4px 12px var(--shadow); max-height: 200px;
+  overflow-y: auto; z-index: 100; display: none; margin-top: 4px;
+}
+.search-item {
+  padding: 8px 12px; cursor: pointer; font-size: 13px; color: var(--text-main);
+  border-bottom: 1px solid var(--border-color); transition: background 0.15s;
+}
+.search-item:hover { background: rgba(59,130,246,0.1); color: #3b82f6; }
+.search-item:last-child { border-bottom: none; }
+
+/* --- КАСТОМНЫЙ ТУЛТИП --- */
+.tooltip {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -100%) translateY(10px);
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 1000;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%; left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+}
+.tooltip.visible {
+  opacity: 1;
+  transform: translate(-50%, -100%) translateY(-5px);
+}
 
 /* ===============================
    ВЕРСИЯ ДЛЯ ТЕЛЕФОНОВ
    =============================== */
 @media (max-width: 600px) {
   
-  /* Выравниваем кнопки зума и надпись по одной линии снизу */
   #zoom-controls {
     position: absolute;
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px)); /* Одинаковый отступ для обоих */
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     right: 12px;
   }
 
+  /* Переключатель тем на телефоне */
+  #theme-switcher {
+    position: absolute;
+    bottom: calc(75px + env(safe-area-inset-bottom, 0px)); /* Над плашкой автора */
+    left: 12px;
+  }
+
   #credits {
-    position: absolute; /* Возвращаем absolute, чтобы он вел себя так же, как зум */
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px)); /* Одинаковый отступ */
+    position: absolute;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     left: 12px;
     padding: 8px 12px;
     z-index: 5;
-    background: rgba(255, 255, 255, 0.95); 
-    backdrop-filter: none; /* Убираем размытие, чтобы не глючило на мобилках */
+    background: var(--panel-bg); 
+    backdrop-filter: none; 
   }
   
   .credits-title { font-size: 12px; }
@@ -209,7 +364,7 @@ html, body {
     flex-direction: column;
     overflow: hidden;
     z-index: 100 !important; 
-    background: #fff !important; 
+    background: var(--bg-color) !important; 
     backdrop-filter: none !important; 
   }
 
@@ -217,8 +372,8 @@ html, body {
     position: fixed;
     top: 16px; right: 16px;
     float: none; margin: 0;
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    background: var(--panel-bg);
+    box-shadow: 0 2px 8px var(--shadow);
     z-index: 999;
   }
 
@@ -249,8 +404,8 @@ html, body {
     gap: 12px;
     padding: 12px 16px;
     padding-bottom: calc(12px + env(safe-area-inset-bottom, 16px));
-    background: #fff;
-    border-top: 1px solid #eee;
+    background: var(--panel-bg);
+    border-top: 1px solid var(--border-color);
     margin-top: auto;
     z-index: 10;
   }
@@ -259,7 +414,7 @@ html, body {
     width: 60px; height: 60px;
     padding: 4px; margin-bottom: 0;
     flex-shrink: 0;
-    background: #f5f7f9; border-radius: 8px;
+    background: var(--qr-bg); border-radius: 8px;
   }
   .qr-label { display: none; }
   .info-qr {

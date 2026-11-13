@@ -2,7 +2,6 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <!-- viewport-fit=cover для телефонов -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>StoryMap Project</title>
     <link rel="icon" href="images/icon.png" type="image/png">
@@ -10,6 +9,9 @@
     <link rel="stylesheet" href="css-styles/style.css">
 </head>
 <body>
+    <!-- Контейнер для тултипа -->
+    <div id="tooltip" class="tooltip"></div>
+
     <div id="app">
         <div id="map-container">
         <div id="map-wrapper">
@@ -19,11 +21,15 @@
         </div>
 
         <div id="legend" class="panel">
-        <div class="legend-title">Категории</div>
-        <div class="legend-items" id="legend-items"></div>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Поиск мест..." autocomplete="off">
+                <div id="search-results"></div>
+            </div>
+
+            <div class="legend-title">Категории</div>
+            <div class="legend-items" id="legend-items"></div>
         </div>
 
-        <!-- ИНФО-ПАНЕЛЬ -->
         <div id="info-panel" class="panel hidden" role="dialog" aria-label="Информация о месте">
             <button class="close-btn" id="close-btn" aria-label="Закрыть">×</button>
             
@@ -32,7 +38,6 @@
             <h2 id="info-name"></h2>
             <div id="info-description" class="info-description"></div>
 
-            <!-- QR штука (на ПК скроллится, на телефоне прилипает к низу) -->
             <div class="info-footer">
                 <div class="info-qr-block">
                     <div class="qr-label">QR-код</div>
@@ -41,16 +46,29 @@
                 <a id="info-link" class="info-link" target="_blank" rel="noopener">Подробнее →</a>
             </div>
         </div>
-        <!-- подпись проекта -->
+
+        <!-- ПЕРЕКЛЮЧАТЕЛЬ ТЕМ -->
+        <div id="theme-switcher" class="panel">
+            <button class="theme-btn" data-theme="auto" title="Как в системе">
+                <img src="images/theme/auto.png" alt="Авто">
+            </button>
+            <button class="theme-btn" data-theme="light" title="Светлая">
+                <img src="images/theme/light.png" alt="Светлая">
+            </button>
+            <button class="theme-btn" data-theme="dark" title="Темная">
+                <img src="images/theme/dark.png" alt="Темная">
+            </button>
+        </div>
+
         <div id="credits" class="panel">
             <div class="credits-title">StoryMap-Web v0.08</div>
             <div class="credits-author">Chernika</div>
         </div>
-        <!--зум -->
+
         <div id="zoom-controls" class="panel">
-        <button id="zoom-in" aria-label="Приблизить">+</button>
-        <button id="zoom-out" aria-label="Отдалить">−</button>
-        <button id="zoom-fit" aria-label="Вписать">⤢</button>
+            <button id="zoom-in" aria-label="Приблизить">+</button>
+            <button id="zoom-out" aria-label="Отдалить">−</button>
+            <button id="zoom-fit" aria-label="Вписать">⤢</button>
         </div>
     </div>
     <script type="module" src="scripts/main.js"></script>

@@ -49,8 +49,44 @@ export function zoomAt(factor, cx, cy, container, wrapper, markersEl, CONFIG) {
   applyTransform(container, wrapper, markersEl, CONFIG);
 }
 
+// --- ПЛАВНЫЙ ПЕРЕЛЕТ ---
+export function flyTo(px, py, container, wrapper, markersEl, CONFIG) {
+  const cw = container.clientWidth;
+  const ch = container.clientHeight;
+  
+  // Выбираем масштаб (если сильно отдалили — приближаем до 0.5)
+  const targetScale = Math.max(state.scale, 0.5); 
+
+  // Включаем плавную CSS-анимацию
+  wrapper.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+
+  // Вычисляем, куда должна сместиться карта
+  let targetX = cw / 2;
+  let targetY = ch / 2;
+
+  // Если мы на ПК (экран > 600px) и открывается панель справа, 
+  // сдвигаем центр влево, чтобы маркер не оказался под панелью
+  if (window.innerWidth > 600) {
+    targetX -= 190; // 190 — это половина ширины панели (380 / 2)
+  }
+
+  state.scale = targetScale;
+  state.tx = targetX - px * state.scale;
+  state.ty = targetY - py * state.scale;
+
+  applyTransform(container, wrapper, markersEl, CONFIG);
+
+  // Убираем анимацию через 600мс
+  setTimeout(() => {
+    wrapper.style.transition = '';
+  }, 600);
+}
+
 export function initMapEvents(container, wrapper, markersEl, CONFIG) {
   container.addEventListener('pointerdown', (e) => {
+    // Отменяем плавность, если пользователь схватил карту
+    wrapper.style.transition = '';
+    
     state.moved = false; 
     if (e.target.closest('.marker')) return; 
     
@@ -68,7 +104,6 @@ export function initMapEvents(container, wrapper, markersEl, CONFIG) {
       state.isDragging = false;
       const [p1, p2] = [...pointers.values()];
       const rect = container.getBoundingClientRect();
-      // Считаем начальное состояние для пинч-зума
       pinchState = {
         dist: Math.hypot(p2.x - p1.x, p2.y - p1.y),
         scale: state.scale,
@@ -87,17 +122,12 @@ export function initMapEvents(container, wrapper, markersEl, CONFIG) {
     if (pointers.size === 2 && pinchState) {
       const [p1, p2] = [...pointers.values()];
       const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-      
-      // Вычисляем новый масштаб
       const newScale = Math.max(CONFIG.minZoom, Math.min(CONFIG.maxZoom, pinchState.scale * (dist / pinchState.dist)));
       const k = newScale / pinchState.scale;
-      
-      // Вычисляем текущий центр между пальцами (он может двигаться)
       const rect = container.getBoundingClientRect();
       const currentMidX = (p1.x + p2.x) / 2 - rect.left;
       const currentMidY = (p1.y + p2.y) / 2 - rect.top;
 
-      // Применяем зум и смещение
       state.scale = newScale;
       state.tx = currentMidX - (pinchState.midX - pinchState.tx) * k;
       state.ty = currentMidY - (pinchState.midY - pinchState.ty) * k;
